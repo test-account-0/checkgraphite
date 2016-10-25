@@ -1,7 +1,7 @@
 # checkgraphite
 Nagios check for graphite
 
-It is a standard pynagio check.
+It is a standard pynagio check (https://github.com/test-account-0/pynagio).
 
 ## Usage:
 ```
