@@ -23,9 +23,9 @@ def get_data(endpoint, expression, verbose=False):
         if verbose:
             print(datapoints)
         if len(datapoints) > 0:
-            value = float(sum(datapoints)) / len(datapoints)
+            value = float(datapoints[-1])
         else:
-            value = float("nan")
+            return False
         data[key] = value
     return data
 
