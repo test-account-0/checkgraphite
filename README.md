@@ -33,5 +33,7 @@ optional arguments:
 
 ## Example:
 ```
-/checkgraphite.py -e 'https://graphite.example.com/render' -E 'from=-90s&format=json&target=some.graphite.expression.???.pcp.kernel_all_load__1_minute' -t 'metric=some_host_pcp_kernel_all_load__1_minute,warn=2..3,crit=4..inf'
+./checkgraphite.py -e 'https://graphite.example.com/render'\
+  -E 'from=-90s&format=json&target=some.graphite.expression.???.pcp.kernel_all_load__1_minute'\
+  -t 'metric=some_host_pcp_kernel_all_load__1_minute,warn=2..3,crit=4..inf'
 ```
