@@ -8,7 +8,8 @@ import re
 import warnings
 
 
-def get_data(endpoint, expression, verbose=False, minimum=False):
+def get_data(endpoint, expression, verbose=False, minimum=False,
+        last_points_to_ignore=0):
     url = "{}?{}".format(endpoint, expression)
     r = requests.get(url, verify=False)
     raw_data = r.json()
@@ -23,6 +24,8 @@ def get_data(endpoint, expression, verbose=False, minimum=False):
                       if datapoint[0]]
         if minimum:
             datapoints = [min(datapoints)]
+        if last_points_to_ignore:
+            datapoints = datapoints[:-last_points_to_ignore]
         if verbose:
             print(datapoints)
         if len(datapoints) > 0:
@@ -52,6 +55,11 @@ def main():
     check.add_option("--minimum",
                      help="Select minimal value",
                      action="store_true")
+    check.add_option("--last-points-to-ignore",
+                     help="Number of last points to ignore",
+                     dest="last_points_to_ignore",
+                     type=int,
+                     choices=xrange(0, 1000))
     check.parse_arguments()
     if not check.args.endpoint or not check.args.expression:
         check.parser.error('-e and -E arguments are required')
@@ -63,8 +71,9 @@ def main():
         warnings.filterwarnings("ignore")
         try:
             data = get_data(endpoint_opt, expression_opt,
-                    verbose=check.args.verbose, minimum=check.args.minimum)
-        except Exception, e:
+                    verbose=check.args.verbose, minimum=check.args.minimum,
+                    last_points_to_ignore=check.args.last_points_to_ignore)
+        except Exception as e:
             print("Cannot get data")
             print(e)
             sys.exit(1)
