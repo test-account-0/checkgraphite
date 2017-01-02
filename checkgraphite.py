@@ -5,9 +5,10 @@ import pynagio
 import requests
 import pprint
 import re
+import warnings
 
 
-def get_data(endpoint, expression, verbose=False):
+def get_data(endpoint, expression, verbose=False, minimum=False):
     url = "{}?{}".format(endpoint, expression)
     r = requests.get(url, verify=False)
     raw_data = r.json()
@@ -20,6 +21,8 @@ def get_data(endpoint, expression, verbose=False):
         key = sanitize_name(metric['target'])
         datapoints = [datapoint[0] for datapoint in metric['datapoints']
                       if datapoint[0]]
+        if minimum:
+            datapoints = [min(datapoints)]
         if verbose:
             print(datapoints)
         if len(datapoints) > 0:
@@ -46,21 +49,25 @@ def main():
     check.add_option("--verbose", "-v",
                      help="More verbose output",
                      action="store_true")
+    check.add_option("--minimum",
+                     help="Select minimal value",
+                     action="store_true")
     check.parse_arguments()
     if not check.args.endpoint or not check.args.expression:
         check.parser.error('-e and -E arguments are required')
     endpoint_opt = check.args.endpoint
     expression_opt = check.args.expression
 
-    try:
-        if check.args.verbose:
-            data = get_data(endpoint_opt, expression_opt, verbose=True)
-        else:
-            data = get_data(endpoint_opt, expression_opt)
-    except Exception, e:
-        print("Cannot get data")
-        print(e)
-        sys.exit(1)
+    # ugly hack for urllib3 warnings on older versions of python
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore")
+        try:
+            data = get_data(endpoint_opt, expression_opt,
+                    verbose=check.args.verbose, minimum=check.args.minimum)
+        except Exception, e:
+            print("Cannot get data")
+            print(e)
+            sys.exit(1)
 
     check.add_metrics(data)
     check.exit()
